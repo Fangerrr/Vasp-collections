@@ -13,10 +13,9 @@ do
   new_old=`stat $file | grep -i Modify | awk -F. '{print $1}' | awk '{print $2$3}'|awk -F- '{print $1$2$3}' | awk -F: '{print $1$2$3}'`
   if [ $old -eq $new_old ]
   then
-     echo continue
+     continue
   else
      newrows=`wc -l $file | sed 's/CHG//g'|sed 's/ //g'`
-     echo $newrows
      echo "aaaa$(($i))" >> $file2
      sed -n "$(($rowsadd)), $(($newrows))p" $file >>  $file2 #add changes
      i=$(($i+1))
