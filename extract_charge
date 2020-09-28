@@ -1,0 +1,40 @@
+#!/bin/bash
+#for element-poscar charge extract and calculation
+#by fang 28092020
+#step1: read ele and number
+declare -A arr
+count=`awk 'NR==6' POSCAR |wc -w` #number of elements
+dirnum=`ls -l | grep "r-x" |wc -l`
+path=/home/fang/Downloads/1/11/PC
+i=1
+for ((j=1;j<=$dirnum;j++))
+         do
+          cd $path/$j
+	  echo cd $j-1
+          cp ACF.dat ACF-copy.dat
+          sed -i '1,2d' ACF-copy.dat #delet unnecessary rows
+  done
+while [ $i -le $count  ];
+do
+	 ele=`awk 'NR==6 {print $'$i'}' $path/POSCAR` #element name
+	 elenum=`awk 'NR==7 {print $'$i'}' $path/POSCAR` #ele number
+        # let i++
+	 echo $ele $elenum
+	 for ((j=1;j<=$dirnum;j++))
+	 do
+          cd $path/$j
+	  echo $ele $elenum cd $j-2
+	  for ((k=1;k<=$elenum;k++))
+	  do
+	   awk 'NR==1 {print $5}' ACF-copy.dat >> $path/$ele$k.dat
+	   sed -i '1d' ACF-copy.dat
+	   echo $ele$k
+          done #delete used rows
+	  cd ..
+         done
+	 let i++
+         
+done
+
+
+
