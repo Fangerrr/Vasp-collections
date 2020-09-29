@@ -1,0 +1,46 @@
+#!/bin/bash
+#for element-poscar charge extract and calculation
+#by fang 28092020
+#step1: read ele and number
+declare -A arr
+count=`awk 'NR==6' POSCAR |wc -w` #number of elements
+dirnum=`ls -l | grep "r-x" |wc -l`
+path=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd) #obtain current path
+mkdir $path/Charges
+i=1
+for ((j=1;j<=$dirnum;j++))
+         do
+          cd $path/$j
+	  #echo cd $j-1
+          cp ACF.dat ACF-copy.dat
+          sed -i '1,2d' ACF-copy.dat #delet unnecessary rows
+  done
+while [ $i -le $count  ];
+do
+	 ele=`awk 'NR==6 {print $'$i'}' $path/POSCAR` #element name
+	 elenum=`awk 'NR==7 {print $'$i'}' $path/POSCAR` #ele number
+	 valence=`grep ZVAL $path/POTCAR | awk 'NR=='$i' {print $6}'` #valence of element
+        # let i++
+	 #echo $ele $elenum 
+	# echo $i  $valence
+	 for ((j=1;j<=$dirnum;j++))
+	 do
+          cd $path/$j
+	 # echo $ele $elenum cd $j-2
+	  for ((k=1;k<=$elenum;k++))
+	  do # calculate valence electrons
+		  awk  'NR==1 {print '$valence'-$5}' ACF-copy.dat >> $path/Charges/$ele$k.dat
+		 # f1=$(awk 'NR==1 {print '$valence'-$5}' ACF-copy.dat)
+		 # f2=$(awk 'NR==1 {print $5}' ACF-copy.dat)
+		 # echo $valence  $f1 $f2
+		  sed -i '1d' ACF-copy.dat
+	  # echo $ele$k
+          done #delete used rows
+	  cd ..
+         done
+	 let i++
+         
+done
+
+
+
